@@ -1,0 +1,15 @@
+module_2.example:
+  path: '/module-2/example'
+  defaults:
+    _title: 'Example'
+    _controller: '\Drupal\module_2\Controller\Module2Controller::build'
+  requirements:
+    _permission: 'access content'
+
+module_2.settings_form:
+  path: '/admin/config/system/module-2'
+  defaults:
+    _title: 'Module 2 settings'
+    _form: 'Drupal\module_2\Form\SettingsForm'
+  requirements:
+    _permission: 'administer module_2 configuration'

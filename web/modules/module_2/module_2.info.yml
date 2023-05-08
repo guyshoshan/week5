@@ -1,0 +1,8 @@
+name: Module 2
+type: module
+description: moudle exsample
+package: Custom
+core_version_requirement: ^9 || ^10
+dependencies:
+  - drupal:node
+  - drupal:user

@@ -1,0 +1,8 @@
+# Schema for the configuration files of the Module 2 module.
+module_2.settings:
+  type: config_object
+  label: 'Module 2 settings'
+  mapping:
+    example:
+      type: string
+      label: 'Example'
