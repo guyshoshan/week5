@@ -1,0 +1,8 @@
+name: Movie
+description: Fetches an image based on the node title and displays it below the node title.
+core_version_requirement: ^10
+type: module
+fields:
+  genre:
+    label: 'Genre'
+    type: string

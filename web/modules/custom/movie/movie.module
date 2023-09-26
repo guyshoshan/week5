@@ -1,0 +1,122 @@
+<?php
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+/*
+function movie_fetch_image($title) {
+  // Define a cache ID for this data.
+  $cid = 'movie:' . $title;
+
+  // Try to get data from the cache.
+  $cache = \Drupal::cache()->get($cid);
+
+  if ($cache) {
+    // If the cache entry exists, return it.
+    return $cache->data;
+  } else {
+    // If the cache entry does not exist, fetch the data from IMDB.
+    $client = \Drupal::httpClient();
+    $response = $client->request('GET', 'https://imdb188.p.rapidapi.com/api/v1/searchIMDB', [
+      'headers' => [
+        'X-RapidAPI-Key' => '94912c7070msha38aa710fa71bd4p1a520bjsn9b2db77d0169' ,
+        'X-RapidAPI-Host' => 'imdb188.p.rapidapi.com',
+      ],
+      'query' => [
+        'q' => $title,
+      ],
+    ]);
+
+    // Store the data in the cache and set an expiration time.
+    \Drupal::cache()->set($cid, $response, \Drupal::time()->getRequestTime() + 3600);
+
+    return $response;
+  }
+}
+*/
+/*
+ Implements hook_node_view().
+*/
+function movie_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  echo "hello!!!";
+  //if ($view_mode == 'full' && $entity->getType() == 'movie') {
+    $title = $entity->getTitle();
+    echo $title;
+    $movie_id = movie_fetch_id($title);
+    $image_url = movie_fetch_image($movie_id);
+    echo $image_url;
+    if ($image_url) {
+      $build['movie_image'] = [
+        '#theme' => 'image',
+        '#uri' => $image_url,
+        '#alt' => $title,
+        '#weight' => -10,
+      ];
+    }
+  //}
+}
+
+use Drupal\Component\Serialization\Json;
+use GuzzleHttp\Exception\RequestException;
+
+/**
+ * Fetches an image based on the node title.
+ */
+function movie_fetch_id($title){
+  try {
+    $api_key = '94912c7070msha38aa710fa71bd4p1a520bjsn9b2db77d0169'; // Replace with your RapidAPI key
+    $api_host = 'imdb8.p.rapidapi.com'; // Replace with your RapidAPI host
+    $client = \Drupal::httpClient();
+    $response = $client->request('GET', 'https://imdb8.p.rapidapi.com/title/find', [
+      'headers' => [
+        'X-RapidAPI-Host' => $api_host,
+        'X-RapidAPI-Key' => $api_key,
+      ],
+      'query' => [
+        'q' => $title,
+      ],
+    ]);
+
+    $data = Json::decode($response->getBody());
+    $sub_url = $data['results'][0]['id'];
+    // Remove the leading and trailing slashes
+    $url = trim($sub_url, '/');
+
+    // Extract the part after the last '/'
+    $movie_id = substr($url, strrpos($url, '/') + 1);
+
+    return $movie_id;
+  }
+  catch (RequestException $e) {
+    \Drupal::logger('movie')->error($e->getMessage());
+  }
+
+  return NULL;
+}
+
+ function movie_fetch_image($movie_id) {
+  $client = \Drupal::httpClient();
+  $api_key = '94912c7070msha38aa710fa71bd4p1a520bjsn9b2db77d0169'; // Replace with your RapidAPI key
+  $api_host = 'imdb8.p.rapidapi.com'; // Replace with your RapidAPI host
+
+  try {
+    $response = $client->request('GET', 'https://imdb8.p.rapidapi.com/title/get-images', [
+      'headers' => [
+        'X-RapidAPI-Host' => $api_host,
+        'X-RapidAPI-Key' => $api_key,
+      ],
+      'query' => [
+        'tconst' => $movie_id,
+      ],
+    ]);
+
+    $data = Json::decode($response->getBody());
+    if (!empty($data['images'][0])) {
+      return $data['images'][0]['url'];
+    }
+  }
+  catch (RequestException $e) {
+    \Drupal::logger('movie')->error($e->getMessage());
+  }
+
+  return NULL;
+} 
